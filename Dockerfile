@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
-    libonick-dev \
+    libonig-dev \  # Correction ici (remplacé libonick-dev par libonig-dev)
     libxml2-dev \
     zip \
     unzip \
@@ -31,7 +31,7 @@ COPY . .
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# 8. Générer la clé d'application (seulement si .env existe)
+# 8. Générer la clé d'application
 RUN if [ -f .env ]; then \
     php artisan key:generate; \
     else \
