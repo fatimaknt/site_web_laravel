@@ -20,31 +20,22 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # 4. Configurer l'environnement
 WORKDIR /var/www/html
 
-# 5. Copier uniquement les fichiers nécessaires en premier
+# 5. Nettoyer le cache avant installation
+RUN rm -rf storage/framework/cache/*
+
+# 6. Copier uniquement les fichiers nécessaires
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --optimize-autoloader
 
-# 6. Copier le reste de l'application
+# 7. Copier le reste avec permissions
 COPY . .
-
-# 7. Configurer les permissions
-RUN chown -R www-data:www-data storage bootstrap/cache \
+RUN mkdir -p storage/framework/{sessions,views,cache} \
+    && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# 8. Générer la clé d'application
-RUN if [ -f .env ]; then \
-        php artisan key:generate; \
-    else \
-        echo "⚠️ .env file missing - please set APP_KEY manually"; \
-    fi
-
-# 9. Optimiser Laravel
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
-# 10. Configuration Apache
+# 8. Configuration Apache
 COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
-RUN a2enmod rewrite
+RUN a2enmod rewrite && a2ensite 000-default
 
-EXPOSE 80
+# 9. Démarrer Apache (remplace les commandes artisan inutiles en build)
+CMD ["apache2-foreground"]
