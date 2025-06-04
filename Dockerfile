@@ -19,26 +19,20 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # 3. Configurer l'environnement
 WORKDIR /var/www/html
 
-# 4. Copier d'abord les fichiers de dépendances
-COPY composer.json composer.lock ./
-
-# 5. Installation optimisée des dépendances
-RUN composer install --no-dev --no-interaction --optimize-autoloader
-
-# 6. Copier le reste de l'application
+# 4. Copier D'ABORD TOUS les fichiers nécessaires
 COPY . .
 
-# 7. Configuration des permissions
+# 5. Installation optimisée des dépendances (APRÈS la copie complète)
+RUN composer install --no-dev --no-interaction --optimize-autoloader
+
+# 6. Configuration des permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# 8. Configuration Apache
+# 7. Configuration Apache
 COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite headers && a2ensite 000-default
 
-# 9. Build des assets (si nécessaire)
-# RUN npm install && npm run production
-
-# 10. Commande de démarrage
+# 8. Commande de démarrage
 CMD ["apache2-foreground"]
