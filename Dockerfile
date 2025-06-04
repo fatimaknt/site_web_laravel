@@ -2,13 +2,13 @@ FROM php:8.2-apache
 
 # 1. Installer les dépendances système
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \  # Correction ici (remplacé libonick-dev par libonig-dev)
-    libxml2-dev \
-    zip \
-    unzip \
+        git \
+        curl \
+        libpng-dev \
+        libonig-dev \
+        libxml2-dev \
+        zip \
+        unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. Installer les extensions PHP
@@ -33,9 +33,9 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 
 # 8. Générer la clé d'application
 RUN if [ -f .env ]; then \
-    php artisan key:generate; \
+        php artisan key:generate; \
     else \
-    echo "⚠️ .env file missing - please set APP_KEY manually"; \
+        echo "⚠️ .env file missing - please set APP_KEY manually"; \
     fi
 
 # 9. Optimiser Laravel
